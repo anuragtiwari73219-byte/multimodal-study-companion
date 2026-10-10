@@ -1,0 +1,12 @@
+﻿.env
+venv/
+__pycache__/
+*.pyc
+data/
+extracted_images/
+chroma_db/
+chroma/
+*.sqlite3
+project_info*.txt
+check_out.txt
+patch_*.py

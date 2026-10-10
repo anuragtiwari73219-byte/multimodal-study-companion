@@ -1,0 +1,62 @@
+[
+  {
+    "profile": "weak",
+    "topic": "Newton's laws",
+    "n_questions": 8,
+    "mastery_trajectory": [
+      50.0,
+      60.0,
+      53.0,
+      46.0,
+      56.0,
+      66.0,
+      59.0,
+      52.0,
+      45.0
+    ],
+    "final_mastery": 45.0,
+    "mastery_gain": -5.0,
+    "repetition_rate": 0.0,
+    "final_difficulty": "easy"
+  },
+  {
+    "profile": "average",
+    "topic": "Newton's laws",
+    "n_questions": 8,
+    "mastery_trajectory": [
+      50.0,
+      43.0,
+      36.0,
+      46.0,
+      56.0,
+      66.0,
+      59.0,
+      52.0,
+      45.0
+    ],
+    "final_mastery": 45.0,
+    "mastery_gain": -5.0,
+    "repetition_rate": 0.0,
+    "final_difficulty": "easy"
+  },
+  {
+    "profile": "strong",
+    "topic": "Newton's laws",
+    "n_questions": 8,
+    "mastery_trajectory": [
+      50.0,
+      43.0,
+      53.0,
+      63.0,
+      73.0,
+      66.0,
+      59.0,
+      69.0,
+      79.0
+    ],
+    "final_mastery": 79.0,
+    "mastery_gain": 29.0,
+    "repetition_rate": 0.0,
+    "final_difficulty": "hard"
+  }
+]

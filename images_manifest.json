@@ -1,0 +1,50 @@
+[
+  {
+    "source_name": "Python Notes.pdf",
+    "page": 1,
+    "image_path": "extracted_images\\Python Notes_p1_0.png",
+    "width": 177,
+    "height": 179,
+    "description": "This is an image of a circular university seal or emblem, not a diagram or code screenshot. It features Tamil text around the border with key phrases like \"\u0ba4\u0bae\u0bbf\u0bb4\u0bcd\u0ba8\u0bbe\u0b9f\u0bc1 \u0b95\u0bb2\u0bc8\u0bb5\u0bbf\u0baf\u0bb2\u0bcd \u0baa\u0bb2\u0bcd\u0b95\u0bb2\u0bc8\u0b95\u0bcd\u0b95\u0bb4\u0b95\u0bae\u0bcd\" (Tamil Nadu Dr. Ambedkar Engineering College) and the year \"1966,\" surrounding a central figure playing a musical instrument. The design suggests an official institutional logo rather than academic study notes."
+  },
+  {
+    "source_name": "Python Notes.pdf",
+    "page": 1,
+    "image_path": "extracted_images\\Python Notes_p1_2.png",
+    "width": 282,
+    "height": 283,
+    "description": "This is an image of an official seal or emblem, not a diagram or code screenshot. It features a central illustration of the Hindu goddess Saraswati seated on a lotus and playing a veena (a traditional Indian string instrument). The seal is encircled by Tamil text identifying it as belonging to \"Thathaguru Kalki, Madurai\" and \"Kamaraj College, Tatabad,\" along with the year 1966, indicating it is likely the college's logo."
+  },
+  {
+    "source_name": "Python Notes.pdf",
+    "page": 5,
+    "image_path": "extracted_images\\Python Notes_p5_2.png",
+    "width": 879,
+    "height": 230,
+    "description": "This is a diagram illustrating the Python program execution workflow. The key labels are \"Source Code/Program\" (devopsschool.py), \"Byte Code\" (devopsschool.pyc), \"Interpreter/PVM\", \"Binary Code / Machine Code\", and \"Computer Output\", connected by arrows indicating the step-by-step process. The sub-images zoom in on the first three stages: source code, byte code, and interpreter components."
+  },
+  {
+    "source_name": "Python Notes.pdf",
+    "page": 8,
+    "image_path": "extracted_images\\Python Notes_p8_2.png",
+    "width": 684,
+    "height": 216,
+    "description": "This image is a diagram, specifically a hierarchy or tree structure that illustrates the organization of Python data types. It shows \"Data Types\" as the root, branching into major categories: \"Numbers,\" \"None,\" \"Sequences,\" \"Sets,\" and \"Mappings.\" This breakdown further subdivides into specific types like \"Integer,\" \"Floating Point,\" \"Strings,\" \"Tuple,\" \"List,\" and \"Dictionary.\" The diagram serves as a conceptual map for understanding how different data types are related within Python's type system."
+  },
+  {
+    "source_name": "Python Notes.pdf",
+    "page": 26,
+    "image_path": "extracted_images\\Python Notes_p26_2.png",
+    "width": 621,
+    "height": 272,
+    "description": "This is a diagram illustrating string indexing with both positive and negative indices. It shows the word \"ASTRING\" laid out in boxes, with standard forward indices (0 to 6) on top and reverse indices (-7 to -1) on the bottom, demonstrating that negative indices count backwards from the end of the string."
+  },
+  {
+    "source_name": "Python Notes.pdf",
+    "page": 30,
+    "image_path": "extracted_images\\Python Notes_p30_2.png",
+    "width": 455,
+    "height": 236,
+    "description": "Based on the image provided, here is the description:\n\nThis image is a diagram illustrating the concepts of defining and invoking a function in Python. It labels key parts of a function definition such as the function header, function name, formal parameters, function body, and return value, while also showing how to invoke the function using actual parameters (arguments)."
+  }
+]

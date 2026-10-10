@@ -1,0 +1,55 @@
+{
+  "results": [
+    {
+      "question": "What is Newton's second law?",
+      "type": "in_scope",
+      "answer": "Newton's second law states that the force acting on an object equals its mass multiplied by its acceleration (F = m·a).",
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_precision": 0.5,
+      "context_recall": 1.0,
+      "notes": {
+        "faithfulness": "The context explicitly states that force equals mass times acceleration (F = m·a), directly supporting the answer's claim.",
+        "relevancy": "The answer directly defines Newton's second law as requested.",
+        "precision": "2/4 chunks judged relevant",
+        "recall": "The context explicitly derives and states that force equals mass times acceleration (F = ma), fully supporting the reference answer."
+      }
+    },
+    {
+      "question": "What is Python used for?",
+      "type": "in_scope",
+      "answer": "Python is used for web development (server-side), software development, mathematics, and system scripting.",
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_precision": 0.5,
+      "context_recall": 1.0,
+      "notes": {
+        "faithfulness": "All listed uses of Python match the context's description.",
+        "relevancy": "The answer directly lists common uses of Python, addressing the question.",
+        "precision": "2/4 chunks judged relevant",
+        "recall": "The context explicitly lists Web development, Software development, Mathematics, and System scripting as uses of Python, directly matching the reference answer."
+      }
+    },
+    {
+      "question": "Who is the current president of France?",
+      "type": "out_of_scope_refusal",
+      "correctly_refused": true,
+      "answer_given": "This doesn't appear to be covered in the ingested course material."
+    },
+    {
+      "question": "What is the boiling point of mercury?",
+      "type": "out_of_scope_refusal",
+      "correctly_refused": true,
+      "answer_given": "This doesn't appear to be covered in the ingested course material."
+    }
+  ],
+  "summary": {
+    "n_in_scope": 2,
+    "n_refusal_tests": 2,
+    "avg_faithfulness": 1.0,
+    "avg_answer_relevancy": 1.0,
+    "avg_context_precision": 0.5,
+    "avg_context_recall": 1.0,
+    "refusal_accuracy": 1.0
+  }
+}

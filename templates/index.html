@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Study Companion</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 16px; }
+  h2 { border-bottom: 2px solid #333; padding-bottom: 6px; }
+  section { margin-bottom: 40px; }
+  input[type=text] { width: 70%; padding: 8px; }
+  button { padding: 8px 14px; margin-left: 6px; cursor: pointer; }
+  .box { background: #f4f4f4; padding: 12px; border-radius: 6px; margin-top: 12px; white-space: pre-wrap; }
+  .source { color: #555; font-size: 0.9em; margin-top: 6px; }
+  .correct { color: green; font-weight: bold; }
+  .incorrect { color: #b00; font-weight: bold; }
+  .mastery-bar { background: #ddd; border-radius: 4px; height: 14px; margin-top: 10px; overflow: hidden; }
+  .mastery-fill { background: #2a7; height: 100%; transition: width 0.3s; }
+  .mcq-option { display: block; width: 100%; text-align: left; margin: 4px 0; padding: 8px; }
+</style>
+</head>
+<body>
+
+<h1>AI Study Companion</h1>
+
+<section>
+  <h2>Ask a Question</h2>
+  <input type="text" id="askInput" placeholder="e.g. What is Newton's second law?">
+  <button onclick="askQuestion()">Ask</button>
+  <div id="askResult" class="box" style="display:none;"></div>
+</section>
+
+<section>
+  <h2>Adaptive Quiz</h2>
+  <input type="text" id="topicInput" placeholder="e.g. Newton's laws">
+  <button onclick="startQuiz()">Start Quiz</button>
+  <div id="quizBox" class="box" style="display:none;"></div>
+</section>
+
+<script>
+async function askQuestion() {
+  const question = document.getElementById('askInput').value.trim();
+  if (!question) return;
+  const res = await fetch('/ask', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({question})
+  });
+  const data = await res.json();
+  const box = document.getElementById('askResult');
+  box.style.display = 'block';
+  if (data.error) { box.innerText = 'Error: ' + data.error; return; }
+  let html = data.answer;
+  if (data.sources && data.sources.length) {
+    html += '\n\nSources:\n' + data.sources.map(s => '- ' + s).join('\n');
+  }
+  box.innerText = html;
+  (data.images || []).forEach(p => {
+    const img = document.createElement('img');
+    img.src = '/images/' + encodeURIComponent(p.split(/[\\/]/).pop());
+    img.alt = 'Diagram from course notes';
+    img.style.cssText = 'display:block;max-width:100%;margin-top:12px;border:1px solid #ccc;';
+    box.appendChild(img);
+  });
+}
+
+let quizState = { difficulty: null, source: null };
+
+async function startQuiz() {
+  const topic = document.getElementById('topicInput').value.trim();
+  if (!topic) return;
+  const res = await fetch('/quiz/start', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({topic})
+  });
+  const data = await res.json();
+  const box = document.getElementById('quizBox');
+  box.style.display = 'block';
+  if (data.error) { box.innerText = 'Error: ' + data.error; return; }
+  renderQuestion(data.question, data.difficulty, data.source, data.question_type, data.options, data.mastery);
+}
+
+function renderMasteryBar(mastery) {
+  return `<div style="font-size:0.9em;">Mastery: ${Math.round(mastery)}/100</div>
+          <div class="mastery-bar"><div class="mastery-fill" style="width:${mastery}%;"></div></div>`;
+}
+
+function renderQuestion(question, difficulty, source, questionType, options, mastery) {
+  const box = document.getElementById('quizBox');
+  let answerInputHtml;
+  const isMcq = questionType === 'mcq' && options && options.length;
+  if (isMcq) {
+    answerInputHtml = '<input type="hidden" id="answerInput" value="">' +
+      options.map(opt =>
+        `<button class="mcq-option" onclick="selectMcqOption('${opt.replace(/'/g, "\\'")}')">${opt}</button>`
+      ).join('');
+  } else {
+    answerInputHtml = `
+      <input type="text" id="answerInput" placeholder="Your answer" style="margin-top:10px;">
+      <button onclick="submitAnswer()">Submit</button>`;
+  }
+  box.innerHTML = `
+    ${renderMasteryBar(mastery)}
+    <div style="margin-top:10px;"><strong>[${difficulty.toUpperCase()} / ${(questionType||'').toUpperCase()}]</strong> ${question}</div>
+    <div class="source">Source: ${source}</div>
+    <div id="answerArea" style="margin-top:10px;">${answerInputHtml}</div>
+    <div id="feedback" style="margin-top:10px;"></div>
+    <button onclick="finishQuiz()" style="margin-top:14px; background:#555; color:white;">Finish Quiz & Get Report</button>
+  `;
+}
+
+async function finishQuiz() {
+  const res = await fetch('/quiz/finish', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}' });
+  const data = await res.json();
+  const box = document.getElementById('quizBox');
+  if (data.error) { box.innerHTML = 'Error: ' + data.error; return; }
+  box.innerHTML = `
+    <h3>Assessment Report: ${data.topic}</h3>
+    <div>Questions answered: ${data.total_questions}</div>
+    <div>Correct: ${data.correct} (${Math.round(data.accuracy*100)}%)</div>
+    ${renderMasteryBar(data.final_mastery)}
+    <div style="margin-top:10px;"><strong>Likely misconception:</strong><br>${data.likely_misconception}</div>
+  `;
+}
+
+function selectMcqOption(opt) {
+  document.getElementById('answerInput').value = opt;
+  submitAnswer();
+}
+
+async function submitAnswer() {
+  const answer = document.getElementById('answerInput').value.trim();
+  if (!answer) return;
+  const res = await fetch('/quiz/answer', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({answer})
+  });
+  const data = await res.json();
+  const feedback = document.getElementById('feedback');
+  if (data.error) {
+    feedback.innerHTML = `<span class="incorrect">${data.correct ? '' : 'Incorrect. '}Expected: ${data.expected_answer}</span><br>${data.error}`;
+    return;
+  }
+  const verdict = data.correct
+    ? '<span class="correct">Correct!</span>'
+    : `<span class="incorrect">Incorrect.</span> Expected: ${data.expected_answer}`;
+
+  window._nextQ = {
+    question: data.next_question, difficulty: data.next_difficulty, source: data.next_source,
+    questionType: data.next_question_type, options: data.next_options, mastery: data.mastery
+  };
+  feedback.innerHTML = renderMasteryBar(data.mastery) + verdict + '<br><br><button onclick="goToNext()">Next Question &rarr;</button>';
+}
+
+function goToNext() {
+  const q = window._nextQ;
+  if (q) renderQuestion(q.question, q.difficulty, q.source, q.questionType, q.options, q.mastery);
+}
+</script>
+
+</body>
+</html>
