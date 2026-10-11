@@ -1,0 +1,245 @@
+{
+  "results": [
+    {
+      "question": "What is Newton's second law?",
+      "type": "in_scope",
+      "answer": "Newton's second law states that the force acting on an object equals its mass multiplied by its acceleration (F = m\u202fa).",
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_precision": 0.5,
+      "context_recall": 1.0,
+      "notes": {
+        "faithfulness": "The context explicitly states that force equals mass times acceleration (F = m\u202fa), matching the answer's claim.",
+        "relevancy": "The answer directly defines Newton's second law as requested.",
+        "precision": "2/4 chunks judged relevant",
+        "recall": "The context explicitly derives and states the equation F = m\u00b7a, providing sufficient information for the reference answer."
+      }
+    },
+    {
+      "question": "What is Newton's first law of motion?",
+      "type": "in_scope",
+      "answer": "The provided chunks do not contain information about Newton's first law of motion.",
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0,
+      "context_recall": 0.8,
+      "notes": {
+        "faithfulness": "The answer correctly states that the provided text does not mention Newton's first law, which is accurate based on the context.",
+        "relevancy": "The answer does not provide Newton's first law and merely states lack of information, failing to address the question.",
+        "precision": "0/4 chunks judged relevant",
+        "recall": "The context explains that a ball stops due to friction and would move indefinitely only if no net force acted, which conveys the inertia principle underlying Newton's first law."
+      }
+    },
+    {
+      "question": "What is Newton's third law of motion?",
+      "type": "in_scope",
+      "answer": "Newton's third law states that if we apply a force on something, that thing applies an equal force back on us, and the two forces act in opposite directions.",
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_precision": 0.25,
+      "context_recall": 0.9,
+      "notes": {
+        "faithfulness": "The answer accurately reflects the context's description of Newton's third law.",
+        "relevancy": "The answer directly defines Newton's third law of motion as requested.",
+        "precision": "1/4 chunks judged relevant",
+        "recall": "The context explains Newton's third law, stating forces are equal and opposite, which directly supports the reference answer."
+      }
+    },
+    {
+      "question": "What is the formula for momentum?",
+      "type": "in_scope",
+      "answer": "This doesn't appear to be covered in the ingested course material.",
+      "faithfulness": 0.0,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.5,
+      "context_recall": 1.0,
+      "notes": {
+        "faithfulness": "The answer's claim about coverage is not supported by any information in the provided context.",
+        "relevancy": "The response does not provide the momentum formula and evades the question.",
+        "precision": "2/4 chunks judged relevant",
+        "recall": "The context explicitly states the equation P = M \u00d7 V, directly providing the definition of momentum as mass times velocity."
+      }
+    },
+    {
+      "question": "Why does a ball eventually stop rolling on a surface?",
+      "type": "in_scope",
+      "answer": "The ball stops because the ground exerts a friction (\u0918\u0930\u094d\u0937\u0923) force on it, which gradually removes its kinetic energy. It would keep moving forever only if the surface had zero friction, which does not exist in real life.",
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_precision": 0.25,
+      "context_recall": 1.0,
+      "notes": {
+        "faithfulness": "All claims in the answer are directly stated in the provided context.",
+        "relevancy": "The answer directly explains that friction removes kinetic energy, causing the ball to stop, which addresses the question.",
+        "precision": "1/4 chunks judged relevant",
+        "recall": "The context explicitly explains that the ball stops due to friction and would keep moving indefinitely without it, directly supporting the reference answer."
+      }
+    },
+    {
+      "question": "What is Python used for?",
+      "type": "in_scope",
+      "answer": "Python is used for web development (server-side), software development, mathematics, and system scripting.",
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_precision": 0.5,
+      "context_recall": 1.0,
+      "notes": {
+        "faithfulness": "All statements in the answer match the usage list provided in the context.",
+        "relevancy": "The answer directly lists common uses of Python, addressing the question.",
+        "precision": "2/4 chunks judged relevant",
+        "recall": "The context explicitly lists the four uses (Web development, Software development, Mathematics, System scripting) matching the reference answer."
+      }
+    },
+    {
+      "question": "How does Python execute a program from source code to output?",
+      "type": "in_scope",
+      "answer": "Python first reads the source\u2011code file (e.g., devopsschool.py). It compiles this code into byte\u2011code (devopsschool.pyc). The byte\u2011code is then handed to the Python interpreter or Python Virtual Machine (PVM), which translates the byte\u2011code into binary/machine code that the computer can execute. The executed machine code produces the program\u2019s output on the screen or other devices.",
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_precision": 0.5,
+      "context_recall": 1.0,
+      "notes": {
+        "faithfulness": "All statements in the answer are directly reflected in the provided context about source code, byte code, interpreter/PVM, machine code, and output.",
+        "relevancy": "The answer directly explains the steps Python takes from source code to producing output.",
+        "precision": "2/4 chunks judged relevant",
+        "recall": "The context explicitly describes source code being compiled to .pyc byte code and executed by the Python virtual machine to produce output."
+      }
+    },
+    {
+      "question": "How does negative indexing work in a Python string?",
+      "type": "in_scope",
+      "answer": "In Python a string can be indexed with negative numbers. The negative index counts backward from the end of the string: -1 refers to the last character, -2 to the second\u2011last, and so on up to -len(string). This lets you retrieve characters in reverse order and also use them in slicing, for example slice(-1, -12, -2) starts at the last character and steps backward.",
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_precision": 0.75,
+      "context_recall": 1.0,
+      "notes": {
+        "faithfulness": "All statements in the answer are directly supported by the context about negative indexing and the slice example.",
+        "relevancy": "The answer directly explains how negative indexing works in Python strings, matching the question.",
+        "precision": "3/4 chunks judged relevant",
+        "recall": "The context explicitly explains that negative indices count from the end of the string and shows -1 as the last character."
+      }
+    },
+    {
+      "question": "What are the main categories of Python data types?",
+      "type": "in_scope",
+      "answer": "The main categories are Numbers (numeric types), None type, Sequences, Sets, and Mappings (dictionaries).",
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_precision": 0.5,
+      "context_recall": 1.0,
+      "notes": {
+        "faithfulness": "The answer correctly lists the main categories exactly as described in the context.",
+        "relevancy": "The answer directly lists the main categories of Python data types as requested.",
+        "precision": "2/4 chunks judged relevant",
+        "recall": "The context explicitly lists Numbers, Sequences, and Sets as Python data type categories, fully supporting the reference answer."
+      }
+    },
+    {
+      "question": "How do you define and call a function in Python?",
+      "type": "in_scope",
+      "answer": "In Python you define a function with the **def** keyword, followed by the function\u2019s name, an optional list of parameters in parentheses, a colon, and an indented block of statements (the function body). For example:\n```python\ndef my_function(param1, param2):\n    # statements\n    return result\n```\nTo use (call) the function, write its name followed by parentheses containing any actual arguments you want to pass:\n```python\nmy_function(arg1, arg2)\n```\nIf the function returns a value, the call can be used in an expression; otherwise it simply performs its actions.",
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_precision": 0.75,
+      "context_recall": 0.97,
+      "notes": {
+        "faithfulness": "All statements in the answer are directly supported by the provided context about function definition, parameters, body, and calling conventions.",
+        "relevancy": "The answer directly explains how to define and call a function in Python with examples.",
+        "precision": "3/4 chunks judged relevant",
+        "recall": "The context explicitly describes that a function consists of a header and body and that it runs when invoked (called) by name, directly supporting the reference answer."
+      }
+    },
+    {
+      "question": "Who is the current president of France?",
+      "type": "out_of_scope_refusal",
+      "correctly_refused": true,
+      "answer_given": "This doesn't appear to be covered in the ingested course material."
+    },
+    {
+      "question": "What is the boiling point of mercury?",
+      "type": "out_of_scope_refusal",
+      "correctly_refused": true,
+      "answer_given": "This doesn't appear to be covered in the ingested course material."
+    },
+    {
+      "question": "What is the capital of India?",
+      "type": "out_of_scope_refusal",
+      "correctly_refused": true,
+      "answer_given": "The provided chunks do not contain information about the capital of India."
+    },
+    {
+      "question": "Explain photosynthesis.",
+      "type": "out_of_scope_refusal",
+      "correctly_refused": true,
+      "answer_given": "The provided chunks do not contain any information about photosynthesis, so I cannot explain it based on the given material."
+    },
+    {
+      "question": "How do I make tea?",
+      "type": "out_of_scope_refusal",
+      "correctly_refused": true,
+      "answer_given": "This doesn't appear to be covered in the ingested course material."
+    },
+    {
+      "question": "What is the speed of light?",
+      "type": "out_of_scope_refusal",
+      "correctly_refused": true,
+      "answer_given": "This doesn't appear to be covered in the ingested course material."
+    }
+  ],
+  "summary": {
+    "n_in_scope": 10,
+    "n_refusal_tests": 6,
+    "avg_faithfulness": 0.9,
+    "avg_answer_relevancy": 0.8,
+    "avg_context_precision": 0.45,
+    "avg_context_recall": 0.967,
+    "refusal_accuracy": 1.0
+  },
+  "retrieval_hit": {
+    "n": 10,
+    "hit_at_4": 1.0,
+    "details": [
+      {
+        "question": "What is Newton's second law?",
+        "hit": true
+      },
+      {
+        "question": "What is Newton's first law of motion?",
+        "hit": true
+      },
+      {
+        "question": "What is Newton's third law of motion?",
+        "hit": true
+      },
+      {
+        "question": "What is the formula for momentum?",
+        "hit": true
+      },
+      {
+        "question": "Why does a ball eventually stop rolling on a surface?",
+        "hit": true
+      },
+      {
+        "question": "What is Python used for?",
+        "hit": true
+      },
+      {
+        "question": "How does Python execute a program from source code to output?",
+        "hit": true
+      },
+      {
+        "question": "How does negative indexing work in a Python string?",
+        "hit": true
+      },
+      {
+        "question": "What are the main categories of Python data types?",
+        "hit": true
+      },
+      {
+        "question": "How do you define and call a function in Python?",
+        "hit": true
+      }
+    ]
+  }
+}
