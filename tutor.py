@@ -94,6 +94,7 @@ def generate_question(topic: str, difficulty: str, question_type: str = None) ->
     system_prompt = (
         f"You are a tutor writing a {difficulty} difficulty question based ONLY on "
         f"the given course material. {type_instruction}\n"
+        "Write the question, any answer options and the correct answer in English only, even if the course material or topic is in another language. Do not include Hindi or transliterated words.\n"
         "Respond ONLY with valid JSON, no other text."
     )
     client = _get_client()
