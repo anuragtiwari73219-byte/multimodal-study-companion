@@ -120,3 +120,11 @@ Two in-scope questions is far too few to treat 1.0 as meaningful. Context precis
 ## Models used
 
 All through the Groq API: `openai/gpt-oss-120b` (answers, tagging, quiz generation, evaluation judge), `whisper-large-v3` (transcription), `qwen/qwen3.8-27b` (diagram descriptions).
+
+## AI assistance disclosure
+
+AI tools used: Claude (Anthropic), as a chat-based coding assistant.
+
+Claude was used throughout this project for writing and debugging code, for planning, and for drafting documentation. Parts that were AI-assisted include: the diagram pipeline (`extract_images.py`, `describe_images.py`, `ingest_images.py`), changes to `qa.py` (citation format and returning image paths), the Flask route and front-end change that shows diagrams in `app.py` and `templates/index.html`, this README, and the Devpost description and demo-video script. The other ingestion, tagging, tutoring, simulation and evaluation code was also written with AI assistance.
+
+I ran, tested and integrated all code myself, chose what to build, and the numbers reported above come from running the scripts in this repository.
