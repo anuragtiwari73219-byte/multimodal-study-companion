@@ -1,0 +1,95 @@
+[
+  {
+    "profile": "weak",
+    "topic": "Newton's laws",
+    "sessions": [
+      {
+        "session": 1,
+        "start_mastery": 50.0,
+        "end_mastery": 45.0,
+        "gain": -5.0,
+        "difficulty_after": "medium"
+      },
+      {
+        "session": 2,
+        "start_mastery": 45.0,
+        "end_mastery": 57.0,
+        "gain": 12.0,
+        "difficulty_after": "medium"
+      },
+      {
+        "session": 3,
+        "start_mastery": 57.0,
+        "end_mastery": 52.0,
+        "gain": -5.0,
+        "difficulty_after": "medium"
+      }
+    ],
+    "total_gain": 2.0,
+    "n_questions": 24,
+    "exact_repetition_rate": 0.0,
+    "semantic_repetition_rate": 0.0
+  },
+  {
+    "profile": "average",
+    "topic": "Newton's laws",
+    "sessions": [
+      {
+        "session": 1,
+        "start_mastery": 50.0,
+        "end_mastery": 62.0,
+        "gain": 12.0,
+        "difficulty_after": "medium"
+      },
+      {
+        "session": 2,
+        "start_mastery": 62.0,
+        "end_mastery": 57.0,
+        "gain": -5.0,
+        "difficulty_after": "easy"
+      },
+      {
+        "session": 3,
+        "start_mastery": 57.0,
+        "end_mastery": 69.0,
+        "gain": 12.0,
+        "difficulty_after": "easy"
+      }
+    ],
+    "total_gain": 19.0,
+    "n_questions": 24,
+    "exact_repetition_rate": 0.0,
+    "semantic_repetition_rate": 0.0
+  },
+  {
+    "profile": "strong",
+    "topic": "Newton's laws",
+    "sessions": [
+      {
+        "session": 1,
+        "start_mastery": 50.0,
+        "end_mastery": 62.0,
+        "gain": 12.0,
+        "difficulty_after": "easy"
+      },
+      {
+        "session": 2,
+        "start_mastery": 62.0,
+        "end_mastery": 86.0,
+        "gain": 24.0,
+        "difficulty_after": "medium"
+      },
+      {
+        "session": 3,
+        "start_mastery": 86.0,
+        "end_mastery": 89.0,
+        "gain": 3.0,
+        "difficulty_after": "medium"
+      }
+    ],
+    "total_gain": 39.0,
+    "n_questions": 24,
+    "exact_repetition_rate": 0.0,
+    "semantic_repetition_rate": 0.0
+  }
+]

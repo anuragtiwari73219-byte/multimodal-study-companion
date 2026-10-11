@@ -39,7 +39,7 @@ def run_simulated_session(profile_name: str, topic: str, n_questions: int = 8, s
     questions_asked = []
 
     for _ in range(n_questions):
-        q = generate_question(topic, level)
+        q = generate_question(topic, level, verify=False)
         if "error" in q:
             break
         questions_asked.append(q["question"])

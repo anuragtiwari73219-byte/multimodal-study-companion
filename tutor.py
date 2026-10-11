@@ -63,7 +63,19 @@ def next_difficulty(current_level: str, recent_results: List[bool]) -> str:
     return LEVELS[idx]
 
 
-def generate_question(topic: str, difficulty: str, question_type: str = None) -> Dict:
+def _location(m):
+    st = m.get("source_type")
+    name = m.get("source_name", "unknown")
+    if st in ("pdf", "image"):
+        pg = m.get("page_number", m.get("page"))
+        if pg is not None:
+            return f"{name}, page {pg}"
+    elif st == "video":
+        return f"{name}, {m.get('timestamp', '00:00')}"
+    return name
+
+
+def _generate_question_once(topic: str, difficulty: str, question_type: str = None) -> Dict:
     """
     Retrieves relevant chunks for the topic, asks the LLM to write ONE
     question grounded in that content, at the given difficulty and type
@@ -79,7 +91,7 @@ def generate_question(topic: str, difficulty: str, question_type: str = None) ->
     if not chunks:
         return {"error": f"No material found on '{topic}'. Ingest more content first."}
 
-    context = "\n\n".join(c["text"] for c in chunks)
+    context = "\n\n".join(f"[Chunk {i}]\n{c['text']}" for i, c in enumerate(chunks))
     source = chunks[0]["metadata"].get("source_name", "unknown")
 
     type_instruction = {
@@ -95,6 +107,7 @@ def generate_question(topic: str, difficulty: str, question_type: str = None) ->
         f"You are a tutor writing a {difficulty} difficulty question based ONLY on "
         f"the given course material. {type_instruction}\n"
         "Write the question, any answer options and the correct answer in English only, even if the course material or topic is in another language. Do not include Hindi or transliterated words.\n"
+        "Also add a \"source_chunk\" field to the JSON: the integer N of the [Chunk N] the question is based on.\n"
         "Respond ONLY with valid JSON, no other text."
     )
     client = _get_client()
@@ -113,6 +126,15 @@ def generate_question(topic: str, difficulty: str, question_type: str = None) ->
         cleaned = raw.strip("`").replace("json\n", "", 1).strip()
         parsed = json.loads(cleaned)  # let it raise if still broken — we want to see real failures
 
+    try:
+        _i = int(parsed.get("source_chunk", 0))
+    except (TypeError, ValueError):
+        _i = 0
+    if not 0 <= _i < len(chunks):
+        _i = 0
+    _m = chunks[_i]["metadata"]
+    source = _m.get("source_name", source)
+
     return {
         "question": parsed["question"],
         "correct_answer": parsed["correct_answer"],
@@ -120,7 +142,53 @@ def generate_question(topic: str, difficulty: str, question_type: str = None) ->
         "question_type": question_type,
         "source": source,
         "difficulty": difficulty,
+        "source_label": _location(_m),
+        "_context": context,
     }
+
+
+VERIFY_MODEL = "qwen/qwen3.8-27b"
+
+
+def verify_question(question, correct_answer, context):
+    """Cross-model check: a different model judges the answer key.
+    Returns True / False, or None if the verifier was unavailable."""
+    import re
+    try:
+        resp = _get_client().chat.completions.create(
+            model=VERIFY_MODEL,
+            messages=[
+                {"role": "system", "content": (
+                    "You verify quiz answer keys. Use the course material for any facts needed, "
+                    "solve the question yourself (recompute any numbers), then say whether the proposed answer is correct. "
+                    'Respond ONLY with JSON: {"valid": true or false}')},
+                {"role": "user", "content": f"Course material:\n{context}\n\nQuestion: {question}\nProposed answer: {correct_answer}"},
+            ],
+            temperature=0,
+        )
+        raw = resp.choices[0].message.content or ""
+        raw = re.sub(r"<think>.*?</think>", "", raw, flags=re.S).strip()
+        m = re.search(r"\{.*?\}", raw, flags=re.S)
+        return bool(json.loads(m.group(0))["valid"]) if m else None
+    except Exception:
+        return None
+
+
+def generate_question(topic, difficulty, question_type=None, verify=True, max_tries=3):
+    q = None
+    for _ in range(max_tries):
+        q = _generate_question_once(topic, difficulty, question_type)
+        if "error" in q:
+            return q
+        ctx = q.pop("_context", "")
+        if not verify:
+            q["verified"] = None
+            return q
+        ok = verify_question(q["question"], q["correct_answer"], ctx)
+        q["verified"] = ok
+        if ok is not False:
+            return q
+    return q
 
 
 def check_answer(question: str, correct_answer: str, student_answer: str) -> bool:

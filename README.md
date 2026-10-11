@@ -6,13 +6,15 @@ Everything here was built and tested on a small corpus: one PDF (Python notes, 8
 
 ## What it does
 
-- **Ingestion (PDF + video):** PDF text is chunked with page numbers. Video is converted to audio with ffmpeg and transcribed with Whisper (`whisper-large-v3` on Groq), keeping a timestamp on every chunk. Everything is stored in ChromaDB with source metadata.
-- **Topic tagging:** each chunk gets a topic, subtopic and list of key concepts from an LLM, written back into the chunk metadata. The script can be re-run safely (already-tagged chunks are skipped).
-- **Diagram extraction:** PyMuPDF pulls embedded raster images out of the PDF. A vision model (`qwen/qwen3.8-27b` on Groq) writes a short description of each, and that description is indexed as an `image` chunk so diagrams can be retrieved and shown next to an answer.
-- **Question answering with citations:** retrieval from ChromaDB, then an LLM (`openai/gpt-oss-120b` on Groq) answers using only the retrieved chunks. The citation shown to the user (for example `file.pdf, page 5` or `video.mp4, 00:58`) is built from our stored metadata, not from the LLM's claim. The LLM only reports which chunk numbers it used.
-- **Out-of-scope refusal:** two gates. First, a distance threshold on the best retrieval match. Second, the LLM must report that the chunks were sufficient. If either fails, the app says the material doesn't cover the question.
-- **Adaptive quiz:** the LLM only writes question and evaluation content. Difficulty (easy, medium, hard) is chosen by a deterministic rule from recent correctness. Mastery per topic is a simple transparent score (+10 for correct, -7 for incorrect, clamped to 0-100), not a real Bayesian Knowledge Tracing or IRT model. Correct answers stay server-side until graded. A report is generated at the end.
-- **Simulated learners and evaluation scripts:** `simulate.py` runs weak, average and strong simulated students through the adaptive logic. `eval.py` scores the Q&A system with our own LLM-as-judge implementation of faithfulness, answer relevancy, context precision and context recall, plus a refusal test.
+- **Ingestion (PDF + video):** PDF text is chunked with page numbers. Video is converted to audio with ffmpeg and transcribed with Whisper (`whisper-large-v3` on Groq), keeping a timestamp on every chunk. Everything is stored in ChromaDB with source metadata. Ingestion runs from a folder with `run_ingestion.py`; the web app has no upload page.
+- **Topic tagging:** each chunk gets a topic, subtopic and list of key concepts from an LLM, written back into the chunk metadata. The script is safe to re-run.
+- **Diagram extraction:** PyMuPDF pulls embedded raster images out of the PDF. A vision model (`qwen/qwen3.8-27b` on Groq) describes each one, and the description is indexed as an `image` chunk so diagrams can be retrieved and shown next to an answer.
+- **Question answering with citations:** retrieval from ChromaDB, then an LLM (`openai/gpt-oss-120b` on Groq) answers using only the retrieved chunks. The citation (for example `file.pdf, page 5` or `video.mp4, 00:58`) is built from our stored metadata, not from the LLM's claim. Each citation is also a link that opens the source at the exact PDF page or video second (this works when the original files are in `data/`).
+- **Out-of-scope refusal:** two gates. First, a distance threshold on the best retrieval match. Second, the LLM must report that the chunks were sufficient.
+- **Adaptive quiz:** question types are MCQ, short answer and numerical. Each question carries a difficulty and a source location (page or timestamp). A student with no history gets a fixed diagnostic start: easy, medium, hard for the first three questions, after which the adaptive rule continues from the highest level answered correctly. Difficulty is chosen by a deterministic rule from recent correctness, not by the LLM. Mastery per topic is a simple transparent score (+10 correct, -7 incorrect, clamped to 0-100), not Bayesian Knowledge Tracing or IRT.
+- **Question quality checks:** each answer key is cross-checked by a second model (`qwen/qwen3.8-27b`); if it disagrees, the question is regenerated (up to 3 attempts), and if the verifier is unavailable the question is served and shown without the cross-check flag. A new question that shares 70% or more of its words with an earlier one in the same quiz is regenerated.
+- **Feedback and report:** after each answer the student sees the expected answer with its source. At the end an LLM-written report gives accuracy and the likely misconception.
+- **Simulated learners and evaluation:** `simulate_multi.py` runs weak, average and strong simulated students over several sessions. `eval_full.py` scores the Q&A system with our own LLM-as-judge implementation of faithfulness, answer relevancy, context precision and context recall, plus a refusal test and a retrieval hit@4 check.
 
 ## Prerequisites
 
@@ -74,33 +76,54 @@ copy .env.example .env
 
 ## Results we measured
 
-All numbers below come from the small runs described above.
+Run the evaluation with `python eval_full.py` (writes `eval_results_full.json`) and the simulation with `python simulate_multi.py` (writes `simulation_multi_results.json`). The numbers below come from those runs on the small corpus described at the top.
 
-**Simulated learners (8 questions per profile).** The strong profile reached mastery 79 and the hard difficulty level. The weak and average profiles both ended with the same mastery gain (-5.0) and both stayed on easy. With 8 questions per profile we cannot tell weak from average. Correctness in `simulate.py` is sampled from a hand-picked probability table, not graded from simulated answers, so this tests the adaptive logic, not realistic student behaviour. Question repetition was 0.0% in every profile, but that check is exact text match only.
-
-**Q&A evaluation (2 in-scope questions, 2 out-of-scope questions).**
+**Q&A evaluation (10 in-scope questions, 6 off-material questions).**
 
 | Metric | Score |
 |---|---|
-| Faithfulness | 1.0 |
-| Answer relevancy | 1.0 |
-| Context precision | 0.5 |
-| Context recall | 1.0 |
-| Refusal accuracy | 2/2 |
+| Faithfulness | 0.90 |
+| Answer relevancy | 0.80 |
+| Context precision | 0.45 |
+| Context recall | 0.967 |
+| Refusal accuracy | 6/6 |
+| Retrieval hit@4 | 10/10 |
 
-Two in-scope questions is far too few to treat 1.0 as meaningful. Context precision of 0.5 means only 2 of 4 retrieved chunks were judged relevant, so retrieving 4 chunks is probably more than needed.
+- Only 4 of the 10 in-scope questions have a gold page. The other 6 only check that the right file was retrieved, and with one PDF and one video that is easy to satisfy. The page-level hits are the stronger evidence.
+- Context precision of 0.45 means fewer than half of the retrieved chunks were judged relevant, so retrieving 4 chunks is more than needed.
+- The reference answers were drafted with AI assistance and have not been exhaustively checked against the source material.
+- The judge is an LLM from the same family that answers the questions.
+
+**Simulated learners (3 sessions of 8 questions per profile, one fixed seed per profile).**
+
+| Profile | Mastery after sessions 1, 2, 3 | Total gain | Difficulty at end |
+|---|---|---|---|
+| Weak | 45, 57, 52 | +2 | medium |
+| Average | 62, 57, 69 | +19 | easy |
+| Strong | 62, 86, 89 | +39 | medium |
+
+Question repetition was 0.0 (exact) and 0.0 (word overlap) across 24 questions per profile, measured with the repeat-avoidance check active, so it shows the check works, not that the model never repeats.
+
+- Each profile was run once, so there is no confidence interval.
+- Correctness is sampled from a hand-picked probability table, not graded from simulated answers. The ordering of the profiles mostly shows that the mastery formula and difficulty rule respond to that table, not that real students learn this way. With +10 and -7, mastery rises on average only when the chance of a correct answer is above about 41%.
+- Final difficulty does not follow mastery: the average profile ended on easy at mastery 69, because the rule only looks at recent results.
+- An earlier single-session run (8 questions, seed not reproducible) could not separate weak from average; this multi-session run replaces it.
 
 ## Known limitations
 
-- **Tiny evaluation sets.** n=8 per simulated profile, and 2 + 2 questions in the Q&A evaluation.
-- **LLM judge, same model family.** `eval.py` uses `openai/gpt-oss-120b` both to answer and to judge. Judges tend to favour their own outputs, and we did not check this. RAGAS could not be imported in our environment because of an upstream dependency break, so we implemented the same four metrics ourselves. These are not RAGAS scores.
-- **The refusal distance threshold is not reliable on its own.** The threshold (1.6) was calibrated on the original two documents. After adding diagram chunks, some out-of-scope questions had best-match distances below it (for example "capital of India" 1.553, "photosynthesis" 1.519, "water cycle diagram" 1.262). In an end-to-end test of five questions the LLM sufficiency check refused those correctly, but we tested only five questions.
-- **Repetition check is exact match.** Semantically duplicate quiz questions with different wording are not detected.
-- **Diagram support is narrow.** It was tested on one PDF with 4 usable diagrams. PyMuPDF extracts embedded raster images only, so diagrams drawn as vector graphics are missed. Image descriptions are model-generated and we did not manually verify all of them. The vision model is a preview-tier model on Groq and may be rotated or removed.
-- **Quiz grounding is not checked.** Generated questions come from retrieved chunks, but we have no automated check that every number or fact in a question appears in the source.
-- **Prerequisites are not built.** Topics, subtopics and concepts are tagged. Linking concepts by prerequisite needs cross-chunk reasoning that we did not implement.
-- **Mastery is a simple heuristic**, not BKT or IRT.
-- **Single user, local only.** Quiz state lives in the Flask session. The app runs in debug mode on localhost and is not hardened for deployment.
+- **Small evaluation sets.** 10 in-scope and 6 off-material questions, and one simulated run per profile. Reference answers were AI-drafted and not exhaustively verified.
+- **LLM judge, same model family.** `eval_full.py` uses `openai/gpt-oss-120b` both to answer and to judge. RAGAS could not be imported in our environment because of an upstream dependency break, so we implemented the same four metrics ourselves. These are not RAGAS scores, and we did not try DeepEval or TruLens.
+- **Context precision is low (0.45).** Retrieval finds the right material but also returns chunks that are not needed.
+- **The refusal distance threshold is not reliable on its own.** It was calibrated on the original two documents. After adding diagram chunks, some out-of-scope questions had best-match distances below it (for example "capital of India" 1.553, "photosynthesis" 1.519, "water cycle diagram" 1.262). The LLM sufficiency check refused them, and all 6 off-material test questions were refused, but this is a small test.
+- **Answer verification is another LLM.** The cross-check uses a preview-tier model, runs once per question, and can be unavailable. It lowers the chance of a wrong answer key but does not guarantee correctness. Quiz questions can also contain details that the source does not state.
+- **Repeat check is word overlap.** Questions with the same meaning but different wording can still repeat.
+- **Diagnostic start is a fixed three-question ladder,** not a calibrated placement test.
+- **Mastery is a simple heuristic,** not BKT or IRT, and the difficulty rule only looks at recent answers.
+- **Diagram support is narrow.** It was tested on one PDF with 4 usable diagrams. PyMuPDF extracts embedded raster images only, so vector diagrams are missed. Descriptions are model-generated and not all were manually verified.
+- **Prerequisites between concepts are not built.** Topics, subtopics and concepts are tagged, but not linked by prerequisite.
+- **Ingestion is command line only.** There is no upload page in the web app.
+- **Free-tier rate limits.** Long runs (evaluation, simulation) hit Groq rate limits and need retries.
+- **Single user, local only.** Quiz state lives in the Flask session. The app runs in debug mode on localhost and is not hardened for deployment. Source links need the original files in `data/`, which are not in the repository.
 
 ## Repository layout
 
@@ -111,11 +134,13 @@ Two in-scope questions is far too few to treat 1.0 as meaningful. Context precis
 | `store.py` | ChromaDB access |
 | `tag_content.py` | Topic, subtopic and concept tagging |
 | `extract_images.py`, `describe_images.py`, `ingest_images.py` | Diagram pipeline |
-| `qa.py` | Cited question answering and refusal logic |
-| `tutor.py` | Question generation, grading, difficulty rule, mastery, report |
+| `qa.py` | Cited question answering, refusal logic, source links |
+| `tutor.py` | Question generation, answer verification, grading, difficulty rule, mastery, report |
 | `app.py`, `templates/index.html` | Flask web app |
-| `simulate.py`, `eval.py` | Simulated learners and Q&A evaluation |
-| `eval_results.json`, `simulation_results.json` | Saved results |
+| `testset.py`, `eval_full.py` | Test set and Q&A evaluation with retrieval hit@4 |
+| `simulate.py`, `simulate_multi.py` | Simulated learners (single session, multi-session) |
+| `eval.py` | Metric implementations used by `eval_full.py` |
+| `eval_results.json`, `eval_results_full.json`, `simulation_results.json`, `simulation_multi_results.json` | Saved results |
 
 ## Models used
 

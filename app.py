@@ -8,6 +8,7 @@ the browser before grading.
 """
 
 import os
+import re
 from flask import Flask, render_template, request, jsonify, session, send_from_directory
 from dotenv import load_dotenv
 from qa import answer_question
@@ -45,13 +46,45 @@ def ask():
     return jsonify(result)
 
 
+def _words(t):
+    return set(re.findall(r"[a-z0-9]+", t.lower()))
+
+
+def _too_similar(q, seen, threshold=0.7):
+    a = _words(q)
+    for s in seen:
+        b = _words(s)
+        if a and b and len(a & b) / len(a | b) >= threshold:
+            return True
+    return False
+
+
+def _fresh_question(topic, level, seen, tries=3):
+    q = generate_question(topic, level)
+    for _ in range(tries - 1):
+        if "error" in q or not _too_similar(q["question"], seen):
+            break
+        q = generate_question(topic, level)
+    return q
+
+
+def _src_text(q):
+    t = q.get("source_label", q.get("source", "unknown"))
+    v = q.get("verified")
+    if v is True:
+        t += " [answer key cross-checked]"
+    elif v is False:
+        t += " [answer key not confirmed]"
+    return t
+
+
 @app.route("/quiz/start", methods=["POST"])
 def quiz_start():
     topic = request.json.get("topic", "").strip()
     if not topic:
         return jsonify({"error": "Topic is empty"}), 400
 
-    level = "medium"
+    level = "easy"  # diagnostic phase starts easy and climbs
     q = generate_question(topic, level)
     if "error" in q:
         return jsonify(q), 404
@@ -65,12 +98,14 @@ def quiz_start():
         "mastery": 50.0,  # start every topic at neutral 50/100
         "current_question": q["question"],
         "current_answer": q["correct_answer"],
+        "current_source": _src_text(q),
+        "current_loc": q.get("source_label", q["source"]),
     }
 
     return jsonify({
         "question": q["question"],
         "difficulty": q["difficulty"],
-        "source": q["source"],
+        "source": _src_text(q),
         "question_type": q["question_type"],
         "options": q["options"],
         "mastery": 50.0,
@@ -86,6 +121,7 @@ def quiz_answer():
     student_answer = request.json.get("answer", "").strip()
     correct = check_answer(quiz["current_question"], quiz["current_answer"], student_answer)
     expected_answer = quiz["current_answer"]  # save before overwriting with next question
+    answered_loc = quiz.get("current_loc")
 
     quiz["question_log"].append({
         "question": quiz["current_question"],
@@ -95,10 +131,20 @@ def quiz_answer():
         "difficulty": quiz["level"],
     })
     quiz["history"].append(correct)
-    new_level = next_difficulty(quiz["level"], quiz["history"])
+    n_done = len(quiz["history"])
+    ladder = ["easy", "medium", "hard"]
+    if n_done < 3:
+        # diagnostic phase for a student with no history: fixed easy -> medium -> hard
+        new_level = ladder[n_done]
+    elif n_done == 3:
+        right = [lv for lv, ok in zip(ladder, quiz["history"][:3]) if ok]
+        new_level = right[-1] if right else "easy"
+    else:
+        new_level = next_difficulty(quiz["level"], quiz["history"])
     new_mastery = update_mastery(quiz.get("mastery", 50.0), correct)
 
-    next_q = generate_question(quiz["topic"], new_level)
+    seen = [x["question"] for x in quiz["question_log"]]
+    next_q = _fresh_question(quiz["topic"], new_level, seen)
     if "error" in next_q:
         session["quiz"] = None
         return jsonify({
@@ -112,15 +158,17 @@ def quiz_answer():
     quiz["mastery"] = new_mastery
     quiz["current_question"] = next_q["question"]
     quiz["current_answer"] = next_q["correct_answer"]
+    quiz["current_source"] = _src_text(next_q)
+    quiz["current_loc"] = next_q.get("source_label", next_q["source"])
     session["quiz"] = quiz
 
     return jsonify({
         "correct": correct,
-        "expected_answer": expected_answer,
+        "expected_answer": f"{expected_answer}  [Source: {answered_loc}]",
         "mastery": new_mastery,
         "next_question": next_q["question"],
         "next_difficulty": new_level,
-        "next_source": next_q["source"],
+        "next_source": _src_text(next_q),
         "next_question_type": next_q["question_type"],
         "next_options": next_q["options"],
     })

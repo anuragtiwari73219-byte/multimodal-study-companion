@@ -96,6 +96,19 @@ function renderMasteryBar(mastery) {
           <div class="mastery-bar"><div class="mastery-fill" style="width:${mastery}%;"></div></div>`;
 }
 
+function sourceHtml(src) {
+  src = String(src || '');
+  let file = null, frag = null;
+  let m = src.match(/^(.*?), page (\d+)/);
+  if (m) { file = m[1]; frag = 'page=' + m[2]; }
+  else {
+    m = src.match(/^(.*?), (?:(\d+):)?(\d+):(\d+)/);
+    if (m) { file = m[1]; frag = 't=' + ((+(m[2] || 0)) * 3600 + (+m[3]) * 60 + (+m[4])); }
+  }
+  if (!file) return 'Source: ' + src;
+  return 'Source: <a target="_blank" href="/source/' + encodeURIComponent(file) + '#' + frag + '">' + src + '</a>';
+}
+
 function renderQuestion(question, difficulty, source, questionType, options, mastery) {
   const box = document.getElementById('quizBox');
   let answerInputHtml;
@@ -113,7 +126,7 @@ function renderQuestion(question, difficulty, source, questionType, options, mas
   box.innerHTML = `
     ${renderMasteryBar(mastery)}
     <div style="margin-top:10px;"><strong>[${difficulty.toUpperCase()} / ${(questionType||'').toUpperCase()}]</strong> ${question}</div>
-    <div class="source">Source: ${source}</div>
+    <div class="source">${sourceHtml(source)}</div>
     <div id="answerArea" style="margin-top:10px;">${answerInputHtml}</div>
     <div id="feedback" style="margin-top:10px;"></div>
     <button onclick="finishQuiz()" style="margin-top:14px; background:#555; color:white;">Finish Quiz & Get Report</button>
