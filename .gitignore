@@ -10,3 +10,6 @@ chroma/
 project_info*.txt
 check_out.txt
 patch_*.py
+
+check*.txt
+*_out.txt
