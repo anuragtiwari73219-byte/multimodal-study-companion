@@ -46,6 +46,19 @@ def _format_source(metadata: Dict) -> str:
     return metadata.get("source_name", "unknown source")
 
 
+def _source_link(metadata: Dict) -> Dict:
+    """Label plus file and URL fragment so the UI can open the exact page or timestamp."""
+    st = metadata.get("source_type")
+    frag = ""
+    if st in ("pdf", "image"):
+        pg = metadata.get("page_number", metadata.get("page"))
+        if pg is not None:
+            frag = f"page={pg}"
+    elif st == "video":
+        frag = f"t={int(metadata.get('timestamp_seconds', 0) or 0)}"
+    return {"label": _format_source(metadata), "file": metadata.get("source_name", ""), "fragment": frag}
+
+
 DISTANCE_THRESHOLD = 1.6  # ChromaDB L2 distance; above this, treat retrieval as "not covered"
 # Calibrated empirically on this project's own ingested content (Newton's
 # laws video + Python notes PDF): in-scope best-match distances were
@@ -146,6 +159,7 @@ def answer_question(question: str, n_results: int = 4) -> Dict:
         "answer": parsed.get("answer", ""),
         "sources": sources,
         "images": images,
+        "links": [_source_link(chunks[i]["metadata"]) for i in used_indices],
         "used_chunk_indices": used_indices,
         "no_answer_found": not parsed.get("sufficient", True),
     }

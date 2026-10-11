@@ -30,6 +30,12 @@ def serve_image(filename):
     return send_from_directory(folder, filename)
 
 
+@app.route("/source/<path:filename>")
+def serve_source(filename):
+    folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+    return send_from_directory(folder, filename)
+
+
 @app.route("/ask", methods=["POST"])
 def ask():
     question = request.json.get("question", "").strip()

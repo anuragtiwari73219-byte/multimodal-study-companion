@@ -60,6 +60,19 @@ async function askQuestion() {
     img.style.cssText = 'display:block;max-width:100%;margin-top:12px;border:1px solid #ccc;';
     box.appendChild(img);
   });
+  if (data.links && data.links.length) {
+    const wrap = document.createElement('div');
+    wrap.style.marginTop = '10px';
+    data.links.forEach(l => {
+      const a = document.createElement('a');
+      a.href = '/source/' + encodeURIComponent(l.file) + (l.fragment ? '#' + l.fragment : '');
+      a.target = '_blank';
+      a.textContent = 'Open source: ' + l.label;
+      a.style.display = 'block';
+      wrap.appendChild(a);
+    });
+    box.appendChild(wrap);
+  }
 }
 
 let quizState = { difficulty: null, source: null };
